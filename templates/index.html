@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOUSE PRICE PREDICTOR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://www.pngall.com/wp-content/uploads/4/Dream-House-PNG-Free-Download.png');
+            background-size: cover;
+            background-position: right;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: flex-start; /* Align content to the left */
+            align-items: center;
+            min-height: 75vh;
+            background-attachment: fixed;
+            color: rgb(28, 26, 26);
+        }
+        .page {
+            display: none;
+            max-width: 500px;
+            width: 80%;
+            padding: 30px;
+            background-color: rgba(255, 253, 253, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            margin-left: 100px; /* Space from the left edge */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%; /* Change from 200% to 100% */
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+            text-align: left;
+            margin-bottom: -10px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #444;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+        input[type="submit"], .btn {
+            background-color: #393c39;
+            color: white;
+            padding: 15px; /* Adjusted padding */
+            border: none; /* Fix border styling */
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        input[type="submit"]:hover, .btn:hover {
+            background-color: #506650;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .result {
+            text-align: center;
+            font-size: 20px;
+            color: #333;
+        }
+        .result h2 {
+            font-size: 26px;
+            color: #011001;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #555;
+            background-color: rgba(30, 37, 30, 0.8);
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            color: white;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 60px 20px;
+                padding: 20px;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+
+    <!-- Welcome Page -->
+    <div class="page active" id="welcomePage">
+        <h1>WELCOME TO THE HOUSE PRICE PREDICTOR</h1>
+        <p>Click the button below to start predicting house prices.</p>
+        <button class="btn" onclick="goToPage('predictPage')">Get Started</button>
+    </div>
+
+    <!-- Prediction Form Page -->
+    <div class="page" id="predictPage">
+        <form id="priceForm">
+            <label for="beds">NUMBER OF BEDROOMS:</label>
+            <input type="number" id="beds" name="beds" required>
+            
+            <label for="baths">NUMBER OF BATHROOMS:</label>
+            <input type="number" id="baths" name="baths" required>
+    
+            <label for="size">SIZE (in sqft):</label>
+            <input type="number" id="size" name="size" required>
+            
+            <label for="location">LOCATION:</label>
+            <input type="text" id="location" name="location" required>
+    
+            <input type="submit" value="Predict Price">
+        </form>
+    </div>
+
+    <!-- Result Page -->
+    <div class="page" id="resultPage">
+        <div class="result" id="result"></div>
+        <button class="btn" onclick="goToPage('predictPage')">Predict Again</button>
+    </div>
+
+    <footer>
+        &copy; 2024 House Price Predictor. All rights reserved.
+    </footer>
+
+    <script>
+        function goToPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            // Show the selected page
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        const form = document.getElementById('priceForm');
+        const resultDiv = document.getElementById('result');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = new URLSearchParams(formData);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<h2>Predicted Price: ₹${data.predicted_price.toFixed(2)}</h2>`;
+                }
+                goToPage('resultPage'); // Switch to result page
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+                goToPage('resultPage'); // Switch to result page
+            });
+        });
+    </script>
+
+</body>
+</html>
